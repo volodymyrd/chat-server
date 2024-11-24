@@ -11,7 +11,14 @@ async fn main() -> anyhow::Result<()> {
             if n == 0 {
                 break;
             }
-            let _ = tcp.write(&buffer[..n]).await?;
+            // convert byte slice to a String
+            let mut line = String::from_utf8(buffer[..n].to_vec())?;
+            // remove line terminating chars added by telnet
+            line.pop(); // remove \n char
+            line.pop(); // remove \r char
+            // add our own line terminator :)
+            line.push_str(" ❤️\n");
+            let _ = tcp.write(line.as_bytes()).await?;
         }
     }
 }
