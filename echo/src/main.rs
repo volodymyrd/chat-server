@@ -1,4 +1,4 @@
-use futures::{SinkExt, StreamExt};
+use futures::{StreamExt};
 use tokio::net::TcpListener;
 use tokio_util::codec::{FramedRead, FramedWrite, LinesCodec};
 
@@ -8,12 +8,13 @@ async fn main() -> anyhow::Result<()> {
     loop {
         let (mut tcp, _) = server.accept().await?;
         let (reader, writer) = tcp.split();
-        let mut stream = FramedRead::new(reader, LinesCodec::new());
-        let mut sink = FramedWrite::new(writer, LinesCodec::new());
+        let stream = FramedRead::new(reader, LinesCodec::new());
+        let sink = FramedWrite::new(writer, LinesCodec::new());
 
-        while let Some(Ok(mut msg)) = stream.next().await {
+        stream.map(|msg| {
+            let mut msg = msg?;
             msg.push_str(" ❤️");
-            sink.send(msg).await?;
-        }
+            Ok(msg)
+        }).forward(sink).await?
     }
 }
