@@ -1,0 +1,4 @@
+Server commands
+  /help - print this message
+  /quit - quit server
+
