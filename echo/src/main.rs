@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-async fn handle_user(mut tcp: TcpStream,  tx: Sender<String>) -> anyhow::Result<()> {
+async fn handle_user(mut tcp: TcpStream, tx: Sender<String>) -> anyhow::Result<()> {
     let (reader, writer) = tcp.split();
     let mut stream = FramedRead::new(reader, LinesCodec::new());
     let mut sink = FramedWrite::new(writer, LinesCodec::new());
@@ -31,20 +31,26 @@ async fn handle_user(mut tcp: TcpStream,  tx: Sender<String>) -> anyhow::Result<
     // the user as soon as they connect
     sink.send(HELP_MSG).await?;
 
-    while let Some(Ok(mut msg)) = stream.next().await {
-        if msg.starts_with("/help") { // handle new /help command
-            sink.send(HELP_MSG).await?;
-        } else if msg.starts_with("/quit") { // handle new /quit command
-            break;
-        } else {
-            msg.push_str(" ❤️");
-            // send all messages to the channel
-            tx.send(msg)?;
+    loop {
+        tokio::select! {
+            msg = stream.next() => {
+                let mut msg = match msg {
+                    Some(msg) => msg?,
+                    None => break,
+                };
+                if msg.starts_with("/help") {
+                    sink.send(HELP_MSG).await?;
+                } else if msg.starts_with("/quit") {
+                    break;
+                } else {
+                    msg.push_str(" ❤️");
+                    let _ = tx.send(msg);
+                }
+            },
+            peer_msg = rx.recv() => {
+                sink.send(peer_msg?).await?;
+            },
         }
-        // receive all of our and others'
-        // messages from the channel
-        let peer_msg = rx.recv().await?;
-        sink.send(peer_msg).await?;
     }
     Ok(())
 }
