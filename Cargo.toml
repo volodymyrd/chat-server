@@ -1,0 +1,18 @@
+[workspace.package]
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.81.0"
+repository = "https://github.com/volodymyrd/chat-server"
+
+[workspace]
+resolver = "2"
+members = ["cancelling_future", "shared", "server"]
+
+[workspace.dependencies]
+anyhow = "1"
+futures = "0"
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0", features = ["codec"] }
+
+# internal
+

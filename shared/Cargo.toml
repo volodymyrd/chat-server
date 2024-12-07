@@ -1,12 +1,8 @@
 [package]
-name = "server"
+name = "shared"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow.workspace = true
-futures.workspace = true
-tokio.workspace = true
-tokio-util.workspace = true
