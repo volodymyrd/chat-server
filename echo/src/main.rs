@@ -1,4 +1,5 @@
 use futures::{SinkExt, StreamExt};
+use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::Sender;
@@ -13,14 +14,18 @@ async fn main() -> anyhow::Result<()> {
     let (tx, _) = broadcast::channel::<String>(32);
 
     loop {
-        let (tcp, _) = server.accept().await?;
+        let (tcp, addr) = server.accept().await?;
 
         // clone it for every connected client
-        tokio::spawn(handle_user(tcp, tx.clone()));
+        tokio::spawn(handle_user(tcp, tx.clone(), addr));
     }
 }
 
-async fn handle_user(mut tcp: TcpStream, tx: Sender<String>) -> anyhow::Result<()> {
+async fn handle_user(
+    mut tcp: TcpStream,
+    tx: Sender<String>,
+    addr: SocketAddr,
+) -> anyhow::Result<()> {
     let (reader, writer) = tcp.split();
     let mut stream = FramedRead::new(reader, LinesCodec::new());
     let mut sink = FramedWrite::new(writer, LinesCodec::new());
@@ -44,7 +49,7 @@ async fn handle_user(mut tcp: TcpStream, tx: Sender<String>) -> anyhow::Result<(
                     break;
                 } else {
                     msg.push_str(" ❤️");
-                    let _ = tx.send(msg);
+                    let _ = tx.send(addr.to_string() + &msg);
                 }
             },
             peer_msg = rx.recv() => {
