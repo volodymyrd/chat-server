@@ -10,9 +10,10 @@ members = ["cancelling_future", "shared", "server"]
 
 [workspace.dependencies]
 anyhow = "1"
+fastrand = "2.0.1"
 futures = "0"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0", features = ["codec"] }
 
 # internal
-
+shared = { path = "shared" }

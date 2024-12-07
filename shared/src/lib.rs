@@ -1,5 +1,13 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use crate::adjectives::ADJECTIVES;
+use crate::animals::ANIMALS;
+
+mod adjectives;
+mod animals;
+
+pub fn random_name() -> String {
+    let adjective = fastrand::choice(ADJECTIVES).unwrap();
+    let animal = fastrand::choice(ANIMALS).unwrap();
+    format!("{adjective}{animal}")
 }
 
 #[cfg(test)]
@@ -7,8 +15,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn test_random_name() {
+        println!("{}", random_name())
     }
 }

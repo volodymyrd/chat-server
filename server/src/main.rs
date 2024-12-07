@@ -1,5 +1,5 @@
 use futures::{SinkExt, StreamExt};
-use std::net::SocketAddr;
+use shared::random_name;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::Sender;
@@ -14,32 +14,28 @@ async fn main() -> anyhow::Result<()> {
     let (tx, _) = broadcast::channel::<String>(32);
 
     loop {
-        let (tcp, addr) = server.accept().await?;
+        let (tcp, _) = server.accept().await?;
 
         // clone it for every connected client
-        tokio::spawn(handle_user(tcp, tx.clone(), addr));
+        tokio::spawn(handle_user(tcp, tx.clone()));
     }
 }
 
-async fn handle_user(
-    mut tcp: TcpStream,
-    tx: Sender<String>,
-    addr: SocketAddr,
-) -> anyhow::Result<()> {
+async fn handle_user(mut tcp: TcpStream, tx: Sender<String>) -> anyhow::Result<()> {
     let (reader, writer) = tcp.split();
     let mut stream = FramedRead::new(reader, LinesCodec::new());
     let mut sink = FramedWrite::new(writer, LinesCodec::new());
     // get a receiver from the sender
     let mut rx = tx.subscribe();
-
+    let name = random_name();
     // send list of server commands to
     // the user as soon as they connect
     sink.send(HELP_MSG).await?;
-
+    sink.send(format!("You are {name}")).await?;
     loop {
         tokio::select! {
             msg = stream.next() => {
-                let mut msg = match msg {
+                let msg = match msg {
                     Some(msg) => msg?,
                     None => break,
                 };
@@ -48,8 +44,7 @@ async fn handle_user(
                 } else if msg.starts_with("/quit") {
                     break;
                 } else {
-                    msg.push_str(" ❤️");
-                    let _ = tx.send(addr.to_string() + &msg);
+                    tx.send(format!("{name}: {msg}"))?;
                 }
             },
             peer_msg = rx.recv() => {
