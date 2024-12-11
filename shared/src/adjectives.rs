@@ -1,4 +1,4 @@
-pub const ADJECTIVES: [&'static str; 613] = [
+pub const ADJECTIVES: [&str; 613] = [
     "Graceful", "High", "Impolite", "Accurate", "Hushed", "Wobbly", "Webbed", "Meager", "Assured",
     "Powerful", "Elated", "Indigo", "Immense", "Ruddy", "Bogus", "Agile", "Bold", "Wrinkled",
     "Scented", "Prickly", "Velvet", "Clumsy", "Organic", "Bronze", "Beloved", "Unusual",

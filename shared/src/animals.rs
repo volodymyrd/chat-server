@@ -1,4 +1,4 @@
-pub const ANIMALS: [&'static str; 222] = [
+pub const ANIMALS: [&str; 222] = [
     "Dingo", "Gopher", "Cyclops", "Wren", "Kangaroo", "Frog", "Guppy", "Mouse", "Fowl", "Ostrich",
     "Shark", "Hyena", "Peafowl", "Sponge", "Stork", "Mammoth", "Octopus", "Yeti", "Panther",
     "Basset", "Peacock", "Hawk", "Manatee", "Banshee", "Emu", "Leopard", "Moose", "Rhino",

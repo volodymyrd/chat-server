@@ -1,5 +1,5 @@
-use tokio::time::sleep;
 use std::time::Duration;
+use tokio::time::sleep;
 
 async fn count_to(num: u8) {
     for i in 1..=num {
